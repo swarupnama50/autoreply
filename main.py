@@ -7,40 +7,49 @@ from playwright.async_api import async_playwright
 
 app = Flask(__name__)
 
-AUTO_REPLY_TEXT = ("🔥 Play Shillong Teer Online from Anywhere, Anytime – No More Counter Queues, Just Big Wins! 🔥\n\n"
-                   "✅ Instant & Secure Gameplay\n"
-                   "✅ Trusted Platform\n"
-                   "✅ Easy Withdrawals\n\n"
-                   "🔹 Play Now: teerkhelo.web.app\n\n")
+AUTO_REPLY_TEXT = "🔥 Play Shillong Teer Online from Anywhere, Anytime – No More Counter Queues, Just Big Wins! 🔥\n\n✅ Instant & Secure Gameplay\n✅ Trusted Platform\n✅ Easy Withdrawals\n\n🔹 Play Now: teerkhelo.web.app\n\n"
 
-# Dictionary to hold processed conversations
 processed_chats = {}
 
 async def run(playwright):
     global processed_chats
-    browser = await playwright.chromium.launch(headless=True)
+    print("🚀 Launching Playwright...")
+
+    try:
+        browser = await playwright.chromium.launch(headless=True)
+        print("✅ Browser launched successfully")
+    except Exception as e:
+        print(f"❌ Failed to launch browser: {e}")
+        return
+
     context = await browser.new_context()
     page = await context.new_page()
 
-    await page.goto("https://www.messenger.com/")
+    try:
+        await page.goto("https://www.messenger.com/")
+        print("✅ Opened Messenger")
+    except Exception as e:
+        print(f"❌ Error opening Messenger: {e}")
+        return
 
     email = os.getenv("MESSENGER_EMAIL")
     password = os.getenv("MESSENGER_PASSWORD")
 
-    await page.fill('input[name="email"]', email)
-    await page.fill('input[name="pass"]', password)
-    await page.click('button[name="login"]')
-
-    await page.wait_for_load_state('load', timeout=60000)
-    print("Logged in successfully!")
+    if not email or not password:
+        print("❌ Missing login credentials!")
+        return
 
     try:
-        await page.wait_for_selector('div[aria-label="Chats"]', timeout=15000)
-        await asyncio.sleep(3)
+        await page.fill('input[name="email"]', email)
+        await page.fill('input[name="pass"]', password)
+        await page.click('button[name="login"]')
+        await page.wait_for_load_state('load', timeout=60000)
+        print("✅ Logged in successfully!")
     except Exception as e:
-        print("Chat list not found:", e)
+        print(f"❌ Login failed: {e}")
+        return
 
-    print("Monitoring for unread messages...")
+    print("🎯 Watching for unread messages...")
 
     while True:
         now = datetime.now()
@@ -49,32 +58,29 @@ async def run(playwright):
         unread_elements = await page.query_selector_all(
             "xpath=//*[contains(translate(@aria-label, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'unread')]"
         )
-        if unread_elements:
-            print(f"Found {len(unread_elements)} unread messages.")
-            for unread in unread_elements:
-                try:
-                    await unread.click(force=True)
-                    await page.wait_for_timeout(3000)  # Wait for chat to load
+        print(f"🔍 Found {len(unread_elements)} unread messages.")
 
-                    current_url = page.url
-                    conversation_id = current_url.split("/t/")[1].split("/")[0] if "/t/" in current_url else None
+        for unread in unread_elements:
+            try:
+                await unread.click(force=True)
+                await page.wait_for_timeout(3000)
 
-                    if conversation_id and conversation_id not in processed_chats:
-                        message_box = await page.wait_for_selector('div[aria-label="Message"]', timeout=5000)
-                        await message_box.fill(AUTO_REPLY_TEXT)
-                        await message_box.press("Enter")
-                        print("Auto-reply sent to:", conversation_id)
-                        processed_chats[conversation_id] = datetime.now()
-                except Exception as e:
-                    print("Error processing unread message:", e)
-        else:
-            print("No unread messages.")
+                current_url = page.url
+                conversation_id = current_url.split("/t/")[1].split("/")[0] if "/t/" in current_url else None
+
+                if conversation_id and conversation_id not in processed_chats:
+                    message_box = await page.wait_for_selector('div[aria-label="Message"]', timeout=5000)
+                    await message_box.fill(AUTO_REPLY_TEXT)
+                    await message_box.press("Enter")
+                    print(f"✅ Auto-reply sent to {conversation_id}")
+                    processed_chats[conversation_id] = datetime.now()
+            except Exception as e:
+                print(f"❌ Error processing unread message: {e}")
 
         await asyncio.sleep(10)
 
     await browser.close()
 
-# Start Playwright bot in a background thread
 def start_playwright_bot():
     asyncio.run(run_playwright())
 
