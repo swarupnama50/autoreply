@@ -3,12 +3,13 @@ from getpass import getpass
 from datetime import datetime, timedelta
 from playwright.async_api import async_playwright
 
-AUTO_REPLY_TEXT = (
-    "Please select an option:\n"
-    "🔹 Option 1: Check Order Status\n"
-    "🔹 Option 2: Contact Support\n"
-    "🔹 Option 3: FAQs"
-)
+
+AUTO_REPLY_TEXT = ("🔥 Play Shillong Teer Online from Anywhere, Anytime – No More Counter Queues, Just Big Wins! 🔥\n\n"
+                   "✅ Instant & Secure Gameplay\n"
+                   "✅ Trusted Platform\n"
+                   "✅ Easy Withdrawals\n\n"
+                   "🔹 Play Now: teerkhelo.web.app\n\n"
+                   "🔹 WhatsApp wa.link/79fmfa")
 
 # Dictionary to hold conversation IDs and the time when a reply was sent.
 processed_chats = {}
