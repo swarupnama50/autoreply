@@ -10,7 +10,7 @@ AUTO_REPLY_TEXT = ("🔥 Play Shillong Teer Online from Anywhere, Anytime – No
                    "✅ Trusted Platform\n"
                    "✅ Easy Withdrawals\n\n"
                    "🔹 Play Now: teerkhelo.web.app\n\n"
-                   "🔹 WhatsApp wa.link/79fmfa")
+                   )
 
 # Dictionary to hold conversation IDs and the time when a reply was sent.
 processed_chats = {}
