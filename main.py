@@ -2,6 +2,7 @@ import asyncio
 from getpass import getpass
 from datetime import datetime, timedelta
 from playwright.async_api import async_playwright
+import os
 
 
 AUTO_REPLY_TEXT = ("🔥 Play Shillong Teer Online from Anywhere, Anytime – No More Counter Queues, Just Big Wins! 🔥\n\n"
@@ -23,8 +24,8 @@ async def run(playwright):
     await page.goto("https://www.messenger.com/")
 
     # Prompt for credentials (password input is hidden)
-    email = input("Enter your Messenger email/phone: ")
-    password = getpass("Enter your Messenger password: ")
+    email = os.getenv("MESSENGER_EMAIL")
+    password = os.getenv("MESSENGER_PASSWORD")
 
     # Login
     await page.fill('input[name="email"]', email)
